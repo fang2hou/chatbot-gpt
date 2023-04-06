@@ -38,7 +38,7 @@ func getTokenCostPriceString(numTokens int) string {
 
 	return fmt.Sprintf(
 		"💠 %d  →  🇺🇸 $%.3f / 🇯🇵 ￥%.3f / 🇨🇳 ￥%.3f",
-		numTokens, numDollars, numYen*132.45, numYuan*6.88,
+		numTokens, numDollars, numYen, numYuan,
 	)
 }
 
