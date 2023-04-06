@@ -1,0 +1,54 @@
+discord:
+  production: true
+  token: t0ken
+  locales:
+    error:
+      zhCN: 出错了
+      enUS: Error
+      jaJP: エラー
+      koKR: 에러
+    empty_response:
+      zhCN: 我和 OpenAI 的距离好像有点远呢，我还是先休息一下吧。
+      enUS: I'm too far away from OpenAI, I''ll take a break.
+      jaJP: OpenAIとの距離が遠すぎるので、休憩します。
+      koKR: OpenAI와의 거리가 너무 멀어서 쉬어야 할 것 같아요.
+    cleared:
+      zhCN: 上下文已清空
+      enUS: Context Cleared
+      jaJP: コンテキストをクリアしました
+      koKR: 컨텍스트가 지워졌습니다
+    clear_context:
+      zhCN: 我已经忘记了之前的对话了。
+      enUS: I've forgotten the previous conversation.
+      jaJP: 以前の会話を忘れました。
+      koKR: 이전 대화를 잊었어요.
+    token_limit_reached:
+      zhCN: 已经达到 Token 使用数上限, 请缩减你的提示词。
+      enUS: Token usage limit reached, please shorten your prompt.
+      jaJP: トークン使用数の上限に達しました。プロンプトを短くしてください。
+      koKR: 토큰 사용량이 제한에 도달했습니다. 프롬프트를 줄여주세요.
+  servers:
+    - id: 123456
+      language: zhCN
+      chat_channels:
+        - id: 123456
+          token_limit: 1300
+      commands:
+        clear_context:
+          enable: true
+          aliases:
+            - clear
+    - id: 1234567
+      language: enUS
+      chat_channels:
+        - id: 1234567
+          token_limit: 2000
+      commands:
+        clear_context:
+          enable: true
+          aliases:
+            - clear
+            - cc
+openai:
+  token: t0ken
+  model_id: gpt-3.5-turbo-0301
