@@ -3,8 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"math"
-	"strings"
+	"github.com/pandodao/tokenizer-go"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -13,22 +12,6 @@ import (
 
 	"chatbot-gpt/internal/locale"
 )
-
-// predictNumToken predicts the number of tokens that will be used.
-func predictNumToken(prompt string) int {
-	prompt = strings.TrimSpace(prompt)
-
-	predictedInformation := 0
-	for _, c := range prompt {
-		if c >= 0x4E00 && c <= 0x9FFF {
-			predictedInformation += 3
-		} else {
-			predictedInformation++
-		}
-	}
-
-	return int(math.Max(float64(predictedInformation)/3.8, 10))
-}
 
 // getTokenCostPriceString returns the cost price of the given number of tokens.
 func getTokenCostPriceString(numTokens int) string {
@@ -93,7 +76,7 @@ func chatChanel(s *discordgo.Session, data *discordgo.MessageCreate) bool {
 		return false
 	}
 
-	numPromptToken := predictNumToken(data.Content)
+	numPromptToken := int(float64(tokenizer.MustCalToken(data.Content)) * 1.25)
 	remainingTokens := channelConfig.TokenLimit - numPromptToken
 
 	if remainingTokens < 0 {
