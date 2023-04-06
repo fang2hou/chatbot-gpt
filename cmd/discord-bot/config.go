@@ -121,6 +121,8 @@ func initLocalizer(cfg config.Discord) {
 
 // initServerConfigMap initializes the server configuration map.
 func initServerConfigMap(cfg config.Discord) {
+	ServerConfigMap = make(map[string]ServerConfig)
+
 	for _, serverConfig := range cfg.Servers {
 		chatChannels := make(map[string]ChannelConfig)
 
@@ -136,7 +138,6 @@ func initServerConfigMap(cfg config.Discord) {
 			Logger.Panic("invalid language code", zap.String("code", serverConfig.Language))
 		}
 
-		ServerConfigMap = make(map[string]ServerConfig)
 		ServerConfigMap[serverConfig.ID] = ServerConfig{
 			Language:     language,
 			ChatChannels: chatChannels,
