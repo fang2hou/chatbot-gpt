@@ -135,14 +135,33 @@ func chatChanel(s *discordgo.Session, data *discordgo.MessageCreate) bool {
 	}
 
 	// Send chat response as reply
-	if _, err := s.ChannelMessageSendComplex(data.ChannelID, &discordgo.MessageSend{
-		Content: resp.Choices[0].Message.Content + "\n\n" + getTokenCostPriceString(resp.Usage.TotalTokens),
-		Reference: &discordgo.MessageReference{
-			MessageID: data.ID,
-			GuildID:   data.GuildID,
-		},
-	}); err != nil {
-		Logger.Debug("failed to send message", zap.Error(err))
+	message := resp.Choices[0].Message.Content + "\n\n" + getTokenCostPriceString(resp.Usage.TotalTokens)
+
+	for len(message) > 0 {
+		contentSendInThisLoop := ""
+
+		if len(message) > 2000 {
+			for i := 1999; i > 0; i-- {
+				if message[i] == '\n' {
+					contentSendInThisLoop = message[:i]
+					message = message[i+1:]
+					break
+				}
+			}
+		} else {
+			contentSendInThisLoop = message
+			message = ""
+		}
+
+		if _, err := s.ChannelMessageSendComplex(data.ChannelID, &discordgo.MessageSend{
+			Content: contentSendInThisLoop,
+			Reference: &discordgo.MessageReference{
+				MessageID: data.ID,
+				GuildID:   data.GuildID,
+			},
+		}); err != nil {
+			Logger.Debug("failed to send message", zap.Error(err))
+		}
 	}
 
 	Logger.Debug(
