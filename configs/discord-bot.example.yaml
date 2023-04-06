@@ -23,10 +23,10 @@ discord:
       jaJP: 以前の会話を忘れました。
       koKR: 이전 대화를 잊었어요.
     token_limit_reached:
-      zhCN: 已经达到 Token 使用数上限, 请缩减你的提示词。
-      enUS: Token usage limit reached, please shorten your prompt.
-      jaJP: トークン使用数の上限に達しました。プロンプトを短くしてください。
-      koKR: 토큰 사용량이 제한에 도달했습니다. 프롬프트를 줄여주세요.
+      zhCN: 已经达到 Token 数量上限, 请缩减你的提示词。
+      enUS: Token limit reached, please shorten your prompt.
+      jaJP: トークンの上限に達しました。プロンプトを短くしてください。
+      koKR: 토큰 한도에 도달했습니다. 프롬프트를 줄여주세요.
   servers:
     - id: 123456
       language: zhCN
