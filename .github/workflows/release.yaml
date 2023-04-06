@@ -1,0 +1,75 @@
+name: Release
+
+on:
+  create:
+    tags:
+      - 'v*'
+
+jobs:
+  cross-build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📦 Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 🔍 Get Previous Release Tag
+        id: previous-release
+        run: |
+          LAST_TAG=$(git describe --abbrev=0 --tags ${{ github.ref_name }}~1)
+          echo "ℹ️ Last Release is $LAST_TAG"
+          echo "tag=$LAST_TAG" >> $GITHUB_OUTPUT
+
+      - name: ✳️ Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+          check-latest: true
+
+      - name: 🔄 Initialize Go Environment
+        run: go mod tidy
+
+      - name: ✳️ Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: 🔄 Install NPM Packages
+        run: |
+          echo "ℹ️ Installing discord.js..."
+          npm install discord.js
+          echo "ℹ️ Installing ts-node..."
+          npm install ts-node
+
+      - name: ⚒️ Cross Build All Binaries
+        run: make cross-build-all
+
+      - name: 📝 Generate Changelog
+        id: changelog
+        run: |
+          echo "ℹ️ Generating Changelogs.md and Changes.log ..."
+          CURRENT_TAG=${{ github.ref_name }}
+          LAST_TAG=${{ steps.previous-release.outputs.tag }}
+          BASE_URL=${{ github.event.repository.html_url }}
+          echo "# Changes" > changelog.md
+          git log --pretty=format:"* %s%n" $(git merge-base tags/$LAST_TAG HEAD)..HEAD >> changelog.md
+          git log --pretty=format:"%s%n" $(git merge-base tags/$LAST_TAG HEAD)..HEAD > changes.md
+          echo "-----" >> changelog.md
+          echo "[Commits in this release]($BASE_URL/compare/$LAST_TAG...$CURRENT_TAG)" >> changelog.md
+        shell: bash
+
+      - name: 🚀 Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          name: Release ${{ github.ref_name }}
+          artifacts: "bin/discord-bot/*"
+          bodyFile: "changelog.md"
+
+      - name: 📢 Send Message to Discord
+        run: |
+          echo "ℹ️ Sending release message to Discord channel..."
+          npx ts-node scripts/discord_release_notification.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
