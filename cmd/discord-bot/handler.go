@@ -14,7 +14,7 @@ var (
 	// interactionHandlers is a map of interaction handlers.
 	interactionHandlers = make(map[string]map[string]func(*discordgo.Session, *discordgo.InteractionCreate))
 
-	// commands is a list of slash commands.
+	// slashCommands is a list of slash commands.
 	slashCommands = struct {
 		ClearContext func(alias string) *discordgo.ApplicationCommand
 	}{
