@@ -97,7 +97,7 @@ readFile('./changes.md', 'utf8', (err: NodeJS.ErrnoException | null, data: strin
     for (const [key, value] of Object.entries(artifactSuffixes)) {
         fields.push({
             name: `:low_brightness: ${key}`,
-            value: `[:small_blue_diamond: 下载](${getArtifactUrl("discord-bot", value)})`,
+            value: `:small_blue_diamond: [下载](${getArtifactUrl("discord-bot", value)})`,
             inline: true
         });
     }
