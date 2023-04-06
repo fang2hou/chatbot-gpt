@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/pandodao/tokenizer-go"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/pandodao/tokenizer-go"
 	"github.com/sashabaranov/go-openai"
 	"go.uber.org/zap"
 
