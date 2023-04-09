@@ -5,7 +5,8 @@ go 1.20
 require (
 	github.com/bwmarrin/discordgo v0.27.1
 	github.com/jinzhu/configor v1.2.1
-	github.com/sashabaranov/go-openai v1.5.8
+	github.com/pandodao/tokenizer-go v0.2.0
+	github.com/sashabaranov/go-openai v1.7.0
 	go.uber.org/zap v1.24.0
 )
 
@@ -17,7 +18,6 @@ require (
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/google/pprof v0.0.0-20230405160723-4a4c7d95572b // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
-	github.com/pandodao/tokenizer-go v0.1.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/crypto v0.1.0 // indirect
