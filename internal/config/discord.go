@@ -10,7 +10,7 @@ type Discord struct {
 		Language     string `json:"language" yaml:"language" default:"enUS"`
 		ChatChannels []struct {
 			ID         string `json:"id" yaml:"id"`
-			TokenLimit int    `json:"token_limit" yaml:"token_limit"`
+			TokenLimit int    `json:"token_limit" yaml:"token_limit" default:"500"`
 		} `json:"chat_channels" yaml:"chat_channels" default:"[]"`
 		Commands struct {
 			ClearContext struct {
