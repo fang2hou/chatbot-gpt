@@ -28,7 +28,7 @@ jobs:
           check-latest: true
 
       - name: 🔄 Initialize Go Environment
-        run: go mod tidy
+        run: go get -v ./...
 
       - name: ✳️ Setup Node.js
         uses: actions/setup-node@v3
