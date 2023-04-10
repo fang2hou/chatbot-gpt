@@ -110,6 +110,11 @@ func chatChanel(s *discordgo.Session, data *discordgo.MessageCreate) bool {
 		return false
 	}
 
+	if err := s.ChannelTyping(data.ChannelID); err != nil {
+		Logger.Debug("failed to send typing indicator", zap.Error(err))
+		return false
+	}
+
 	newPrompt := openai.ChatCompletionMessage{
 		Role:    openai.ChatMessageRoleUser,
 		Content: data.Content,
