@@ -12,6 +12,11 @@ discord:
       enUS: It seems I'm still far away from OpenAI, I'll take a break.
       jaJP: OpenAIとの距離がまだ遠いようです。ちょっと休憩します。
       koKR: OpenAI와의 거리가 아직 멀어보여요. 잠시 쉬겠습니다.
+    no_choice:
+      zhCN: 针对这个问题, OpenAI 表示无可奉告!
+      enUS: OpenAI has nothing to talk about this!
+      jaJP: この問題についてOpenAIは何も言えません！
+      koKR: OpenAI는 이에 대해 말할 게 없어요!
     cleared:
       zhCN: 上下文已清空。
       enUS: Context cleared.
