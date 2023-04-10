@@ -6,7 +6,6 @@ import (
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
-
 	"go.uber.org/zap"
 )
 
