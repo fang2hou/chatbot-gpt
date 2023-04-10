@@ -77,7 +77,7 @@ func chatChanel(s *discordgo.Session, data *discordgo.MessageCreate) bool {
 	}
 
 	numPromptToken := int(float64(tokenizer.MustCalToken(data.Content)) * 1.25)
-	remainingTokens := channelConfig.TokenLimit - numPromptToken
+	remainingTokens := channelConfig.PromptTokenLimit - numPromptToken
 
 	if remainingTokens < 0 {
 		sendErrorMessage(s, data, serverConfig.Language, "token_limit_reached")
@@ -107,7 +107,7 @@ func chatChanel(s *discordgo.Session, data *discordgo.MessageCreate) bool {
 
 	// Chat with the OpenAI API
 	resp, chatErr := OpenAIClient.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
-		MaxTokens: channelConfig.TokenLimit,
+		MaxTokens: channelConfig.CompletionTokenLimit,
 		Model:     Model.ID,
 		Messages:  prompts,
 		User:      data.Author.ID,

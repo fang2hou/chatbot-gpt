@@ -15,7 +15,8 @@ import (
 
 // ChannelConfig is the configuration for a channel.
 type ChannelConfig struct {
-	TokenLimit int
+	PromptTokenLimit     int
+	CompletionTokenLimit int
 }
 
 // ServerConfig is the configuration for a server.
@@ -128,7 +129,8 @@ func initServerConfigMap(cfg config.Discord) {
 
 		for _, channelConfig := range serverConfig.ChatChannels {
 			chatChannels[channelConfig.ID] = ChannelConfig{
-				TokenLimit: channelConfig.TokenLimit,
+				PromptTokenLimit:     channelConfig.PromptTokenLimit,
+				CompletionTokenLimit: channelConfig.CompletionTokenLimit,
 			}
 		}
 

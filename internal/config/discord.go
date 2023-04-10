@@ -9,8 +9,9 @@ type Discord struct {
 		ID           string `json:"id" yaml:"id"`
 		Language     string `json:"language" yaml:"language" default:"enUS"`
 		ChatChannels []struct {
-			ID         string `json:"id" yaml:"id"`
-			TokenLimit int    `json:"token_limit" yaml:"token_limit" default:"500"`
+			ID                   string `json:"id" yaml:"id"`
+			PromptTokenLimit     int    `json:"prompt_token_limit" yaml:"prompt_token_limit" default:"500"`
+			CompletionTokenLimit int    `json:"completion_token_limit" yaml:"completion_token_limit" default:"500"`
 		} `json:"chat_channels" yaml:"chat_channels" default:"[]"`
 		Commands struct {
 			ClearContext struct {
