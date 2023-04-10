@@ -27,15 +27,15 @@ make -f makefile cross-build-all
 ## Prepare Configurations
 
 ```bash
-cp configs/discord-bot.example.json configs/discord-bot.json
-vi configs/discord-bot.json
+cp configs/discord-bot.example.yaml configs/discord-bot.yaml
+vi configs/discord-bot.yaml
 ```
 
 You also can set token via environment variable alternatively.
 
 ```bash
-export CHATBOTS_GPT_DISCORD_TOKEN=token
-export CHATBOTS_GPT_OPENAI_TOKEN=token
+export CHATBOT_GPT_DISCORD_TOKEN=token
+export CHATBOT_GPT_OPENAI_TOKEN=token
 ```
 
 ## Run
