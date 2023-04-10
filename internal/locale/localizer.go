@@ -27,7 +27,7 @@ func (g *localizer) Update(key string, lang Language, value string) {
 
 	if !ok {
 		locale = newLocale()
-		g.locales[key] = newLocale()
+		g.locales[key] = locale
 	}
 
 	locale.update(lang, value)
