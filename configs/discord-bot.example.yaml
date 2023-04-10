@@ -32,7 +32,8 @@ discord:
       language: zhCN
       chat_channels:
         - id: 123456
-          token_limit: 1300
+          prompt_token_limit: 1800
+          completion_token_limit: 2000
       commands:
         clear_context:
           enable: true
@@ -42,7 +43,8 @@ discord:
       language: enUS
       chat_channels:
         - id: 1234567
-          token_limit: 2000
+          prompt_token_limit: 1800
+          completion_token_limit: 2000
       commands:
         clear_context:
           enable: true
