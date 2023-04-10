@@ -27,8 +27,8 @@ make -f makefile cross-build-all
 ## Prepare Configurations
 
 ```bash
-cp configs/discord-bot.example.yaml configs/discord-bot.yaml
-vi configs/discord-bot.yaml
+cp configs/discord-bot.example.yml configs/discord-bot.yml
+vi configs/discord-bot.yml
 ```
 
 You also can set token via environment variable alternatively.
@@ -43,7 +43,7 @@ export CHATBOT_GPT_OPENAI_TOKEN=token
 - macOS with Apple Silicon Chip
 
 ```bash
-./bin/discord-bot/discord-bot_darwin_arm64 --config=configs/discord-bot.yaml
+./bin/discord-bot/discord-bot_darwin_arm64 --config=configs/discord-bot.yml
 ```
 
 Otherwise, you need to find the binary file in the `bin` directory, and specify the configuration file.
