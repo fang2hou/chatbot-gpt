@@ -5,6 +5,7 @@ import (
 	"flag"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/pkoukk/tiktoken-go"
 	"github.com/sashabaranov/go-openai"
 	"go.uber.org/zap"
 
@@ -49,6 +50,9 @@ var (
 	// Model is the OpenAI model used by the bot.
 	Model *openai.Model
 
+	// TokenPredictionModel is the model id that used by the bot for token prediction.
+	TokenPredictionModel *tiktoken.Tiktoken
+
 	// ServerConfigMap is the map of server configurations.
 	ServerConfigMap map[string]ServerConfig
 
@@ -78,6 +82,12 @@ func initLogger(isProduction bool) {
 
 // initOpenAIClient initializes the OpenAI client.
 func initOpenAIClient(cfg config.OpenAI) {
+	if tkm, err := tiktoken.EncodingForModel(cfg.TokenPredictionModelID); err != nil {
+		Logger.Panic("failed to initialize token prediction model", zap.Error(err))
+	} else {
+		TokenPredictionModel = tkm
+	}
+
 	OpenAIClient = openai.NewClient(cfg.Token)
 
 	if result, err := OpenAIClient.ListModels(context.Background()); err != nil {

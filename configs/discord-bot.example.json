@@ -76,6 +76,7 @@
   },
   "openai": {
     "token": "t0ken",
-    "model_id": "gpt-3.5-turbo-0301"
+    "model_id": "gpt-3.5-turbo-0301",
+    "token_prediction_model_id": "gpt-3.5-turbo"
   }
 }

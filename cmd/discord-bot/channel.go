@@ -6,12 +6,46 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/pandodao/tokenizer-go"
 	"github.com/sashabaranov/go-openai"
 	"go.uber.org/zap"
 
 	"chatbot-gpt/internal/locale"
 )
+
+// predictTokens predicts the number of tokens usage for the given message.
+func predictTokens(messages []openai.ChatCompletionMessage, includeAssistantSignal bool) int {
+	numTokens := 0
+
+	if includeAssistantSignal {
+		numTokens += 3
+	}
+
+	tokensPerMessage := 0
+	tokensPerName := 0
+
+	switch Model.ID {
+	case "gpt-3.5-turbo":
+	case "gpt-3.5-turbo-0301":
+		tokensPerMessage = 4
+		tokensPerName = -1
+	case "gpt-4":
+	case "gpt-4-0314":
+		tokensPerMessage = 3
+		tokensPerName = 1
+	}
+
+	for _, message := range messages {
+		numTokens += tokensPerMessage
+		if message.Name != "" {
+			numTokens += tokensPerName
+		}
+
+		numTokens += len(TokenPredictionModel.Encode(message.Role, nil, nil))
+		numTokens += len(TokenPredictionModel.Encode(message.Content, nil, nil))
+	}
+
+	return numTokens
+}
 
 // getTokenCostPriceString returns the cost price of the given number of tokens.
 func getTokenCostPriceString(numTokens int) string {
@@ -76,15 +110,19 @@ func chatChanel(s *discordgo.Session, data *discordgo.MessageCreate) bool {
 		return false
 	}
 
-	numPromptToken := int(float64(tokenizer.MustCalToken(data.Content)) * 1.25)
-	remainingTokens := channelConfig.PromptTokenLimit - numPromptToken
+	newPrompt := openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleUser,
+		Content: data.Content,
+	}
+
+	numNewPromptToken := predictTokens([]openai.ChatCompletionMessage{newPrompt}, false)
+	remainingTokens := channelConfig.PromptTokenLimit - 3 - numNewPromptToken
 
 	if remainingTokens < 0 {
 		sendErrorMessage(s, data, serverConfig.Language, "token_limit_reached")
 		return true
 	}
 
-	// Create the prompts
 	var prompts []openai.ChatCompletionMessage
 	previousMessages, tokens, fetchErr := MessageDatabase.Fetch(data.Author.ID, remainingTokens)
 	if fetchErr != nil {
@@ -96,14 +134,13 @@ func chatChanel(s *discordgo.Session, data *discordgo.MessageCreate) bool {
 		prompts = append(prompts, *previousMessages[i])
 	}
 
-	newPrompt := openai.ChatCompletionMessage{
-		Role:    openai.ChatMessageRoleUser,
-		Content: data.Content,
-	}
-
 	prompts = append(prompts, newPrompt)
 
-	Logger.Debug("Prompt", zap.String("prompt", fmt.Sprintf("%+v", prompts)))
+	Logger.Debug(
+		"Prompt",
+		zap.String("prompts", fmt.Sprintf("%+v", prompts)),
+		zap.Int("numNewPromptToken", numNewPromptToken),
+	)
 
 	// Chat with the OpenAI API
 	resp, chatErr := OpenAIClient.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
@@ -128,7 +165,7 @@ func chatChanel(s *discordgo.Session, data *discordgo.MessageCreate) bool {
 	// Store the bot response in the database
 	if err := storeInteraction(
 		data.Author.ID,
-		&newPrompt, numPromptToken,
+		&newPrompt, numNewPromptToken,
 		&resp.Choices[0].Message, resp.Usage.PromptTokens,
 	); err != nil {
 		return true
@@ -167,7 +204,7 @@ func chatChanel(s *discordgo.Session, data *discordgo.MessageCreate) bool {
 	Logger.Debug(
 		"token information",
 		zap.Int("actual", resp.Usage.PromptTokens),
-		zap.Int("predicted", tokens+numPromptToken),
+		zap.Int("predicted", tokens+numNewPromptToken+3),
 	)
 
 	return true
