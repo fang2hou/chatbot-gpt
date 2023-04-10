@@ -1,11 +1,13 @@
 import {readFile} from 'fs';
 import {APIEmbedField, EmbedAuthorOptions, EmbedBuilder, RestOrArray, WebhookClient} from 'discord.js';
 
+const {Configuration, OpenAIApi} = require("openai");
 
 const REPOSITORY: string = process.env.GITHUB_REPOSITORY || '';
 const TAG: string = process.env.GITHUB_REF_NAME || '';
 const GITHUB_URL: string = process.env.GITHUB_SERVER_URL || '';
 const DISCORD_WEBHOOK_URL: string = process.env.DISCORD_WEBHOOK_URL || '';
+const OPENAI_API_KEY: string = process.env.OPENAI_API_KEY || '';
 
 if (REPOSITORY.length === 0) {
     console.error('GITHUB_REPOSITORY is not set');
@@ -73,6 +75,33 @@ readFile('./changes.md', 'utf8', (err: NodeJS.ErrnoException | null, data: strin
             releaseNote += `${line}\n`;
         }
     });
+
+
+    if (OPENAI_API_KEY.length !== 0) {
+        const openai = new OpenAIApi(new Configuration({
+            apiKey: OPENAI_API_KEY,
+        }));
+
+        openai.createChatCompletion({
+            model: "gpt-3.5-turbo-0301",
+            messages: [
+                {
+                    role: "user",
+                    content: "You are a translator for translating the software changelog to chinese," +
+                        "your answer should not include anything outside the list." +
+                        "Do not translate the word 'token' and ':.*:', just keep it as it is."
+                },
+                {
+                    role: "user",
+                    content: releaseNote
+                },
+            ],
+        }).then((response: any) => {
+            releaseNote = response.data.choices[0].message;
+        }).catch((err: any) => {
+            console.error(err);
+        });
+    }
 
     fields.push(
         {name: '**变更列表**', value: releaseNote, inline: false},

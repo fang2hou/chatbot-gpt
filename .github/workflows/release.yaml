@@ -41,6 +41,8 @@ jobs:
           npm install discord.js
           echo "ℹ️ Installing ts-node..."
           npm install ts-node
+          echo "ℹ️ Installing openai..."
+          npm install openai
 
       - name: ⚒️ Cross Build All Binaries
         run: make cross-build-all
