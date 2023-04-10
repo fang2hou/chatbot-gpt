@@ -34,7 +34,7 @@ type ServerConfig struct {
 
 const (
 	// ConfigPrefix is the prefix used for handle environment variables.
-	configPrefix = "CHATBOTS_GPT"
+	configPrefix = "CHATBOT_GPT"
 )
 
 var (
