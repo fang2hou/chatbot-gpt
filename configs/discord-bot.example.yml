@@ -37,6 +37,7 @@ discord:
       language: zhCN
       chat_channels:
         - id: 123456
+          message_edit_interval: 5000
           prompt_token_limit: 1800
           completion_token_limit: 2000
       commands:
@@ -48,6 +49,7 @@ discord:
       language: enUS
       chat_channels:
         - id: 1234567
+          message_edit_interval: 3000
           prompt_token_limit: 1800
           completion_token_limit: 2000
       commands:
