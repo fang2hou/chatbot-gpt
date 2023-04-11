@@ -16,6 +16,7 @@ import (
 
 // ChannelConfig is the configuration for a channel.
 type ChannelConfig struct {
+	MessageEditInterval  int
 	PromptTokenLimit     int
 	CompletionTokenLimit int
 }
@@ -139,6 +140,7 @@ func initServerConfigMap(cfg config.Discord) {
 
 		for _, channelConfig := range serverConfig.ChatChannels {
 			chatChannels[channelConfig.ID] = ChannelConfig{
+				MessageEditInterval:  channelConfig.MessageEditInterval,
 				PromptTokenLimit:     channelConfig.PromptTokenLimit,
 				CompletionTokenLimit: channelConfig.CompletionTokenLimit,
 			}

@@ -10,6 +10,7 @@ type Discord struct {
 		Language     string `json:"language" yaml:"language" default:"enUS"`
 		ChatChannels []struct {
 			ID                   string `json:"id" yaml:"id"`
+			MessageEditInterval  int    `json:"message_edit_interval" yaml:"message_edit_interval" default:"5000"`
 			PromptTokenLimit     int    `json:"prompt_token_limit" yaml:"prompt_token_limit" default:"500"`
 			CompletionTokenLimit int    `json:"completion_token_limit" yaml:"completion_token_limit" default:"500"`
 		} `json:"chat_channels" yaml:"chat_channels" default:"[]"`
