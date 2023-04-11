@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -77,6 +79,105 @@ func storeInteraction(
 	return nil
 }
 
+func sendDiscordResponseWithStream(
+	stream *openai.ChatCompletionStream, interval time.Duration,
+	s *discordgo.Session, guildID, channelID, messageID string,
+	lang locale.Language, numPromptTokens int,
+) (*openai.ChatCompletionMessage, int, error) {
+	var currentResponse *discordgo.Message
+	var currentResponseString string
+	var allResponseString string
+
+	if resp, err := s.ChannelMessageSendComplex(channelID, &discordgo.MessageSend{
+		Content: Localizer.Fetch("wait_for_response", lang),
+		Reference: &discordgo.MessageReference{
+			MessageID: messageID,
+			GuildID:   guildID,
+		},
+	}); err != nil {
+		return nil, 0, err
+	} else {
+		currentResponse = resp
+	}
+
+	lastSentTime := time.Now()
+
+	tryUpdateResponse := func() error {
+		if len(currentResponseString) > 2000 {
+			firstPart := ""
+
+			for i := 1950; i > 0; i-- {
+				if currentResponseString[i] == '\n' {
+					firstPart = currentResponseString[:i]
+					currentResponseString = currentResponseString[i+1:]
+					break
+				}
+			}
+
+			if _, err := s.ChannelMessageEdit(currentResponse.ChannelID, currentResponse.ID, firstPart); err != nil {
+				return err
+			}
+
+			if newMessage, err := s.ChannelMessageSendComplex(channelID, &discordgo.MessageSend{
+				Content: currentResponseString,
+				Reference: &discordgo.MessageReference{
+					MessageID: messageID,
+					GuildID:   guildID,
+				},
+			}); err != nil {
+				return err
+			} else {
+				currentResponse = newMessage
+			}
+		} else {
+			if _, err := s.ChannelMessageEdit(channelID, currentResponse.ID, currentResponseString); err != nil {
+				return err
+			}
+		}
+
+		lastSentTime = time.Now()
+
+		return nil
+	}
+
+	for {
+		resp, streamErr := stream.Recv()
+		if errors.Is(streamErr, io.EOF) || resp.Choices[0].FinishReason == "stop" {
+			break
+		}
+
+		if len(resp.Choices) > 0 {
+			content := resp.Choices[0].Delta.Content
+			if len(content) > 0 {
+				currentResponseString += content
+				allResponseString += content
+			}
+		}
+
+		if time.Since(lastSentTime) > interval {
+			if len(currentResponseString) > 0 {
+				if err := tryUpdateResponse(); err != nil {
+					return nil, 0, err
+				}
+			}
+		}
+	}
+
+	message := &openai.ChatCompletionMessage{
+		Content: allResponseString,
+		Role:    openai.ChatMessageRoleAssistant,
+	}
+
+	numToken := predictTokens([]openai.ChatCompletionMessage{*message}, false)
+	currentResponseString += "\n\n" + getTokenCostPriceString(numToken+numPromptTokens)
+
+	if err := tryUpdateResponse(); err != nil {
+		return nil, 0, err
+	}
+
+	return message, numToken, nil
+}
+
 // sendErrorMessage sends an error message.
 func sendErrorMessage(s *discordgo.Session, data *discordgo.MessageCreate, lang locale.Language, errorMessage string) {
 	if _, err := s.ChannelMessageSendComplex(data.ChannelID, &discordgo.MessageSend{
@@ -147,23 +248,27 @@ func chatChanel(s *discordgo.Session, data *discordgo.MessageCreate) bool {
 		zap.Int("numNewPromptToken", numNewPromptToken),
 	)
 
-	// Chat with the OpenAI API
-	resp, chatErr := OpenAIClient.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+	stream, openAIChatErr := OpenAIClient.CreateChatCompletionStream(context.Background(), openai.ChatCompletionRequest{
 		MaxTokens: channelConfig.CompletionTokenLimit,
 		Model:     Model.ID,
 		Messages:  prompts,
 		User:      data.Author.ID,
 	})
 
-	if chatErr != nil {
+	if openAIChatErr != nil {
 		sendErrorMessage(s, data, serverConfig.Language, "error_response")
-		Logger.Debug("failed to chat with OpenAI", zap.Error(chatErr))
+		Logger.Debug("failed to chat with OpenAI", zap.Error(openAIChatErr))
 		return true
 	}
 
-	// If the response is empty, send an error message
-	if len(resp.Choices) == 0 || len(resp.Choices[0].Message.Content) == 0 {
-		sendErrorMessage(s, data, serverConfig.Language, "no_choice")
+	defer stream.Close()
+
+	responseMessage, numResponseMessage, discordResponseErr := sendDiscordResponseWithStream(
+		stream, time.Duration(channelConfig.MessageEditInterval)*time.Millisecond, s,
+		data.GuildID, data.ChannelID, data.ID, serverConfig.Language, tokens+numNewPromptToken+3)
+	if discordResponseErr != nil {
+		sendErrorMessage(s, data, serverConfig.Language, "error_response")
+		Logger.Debug("failed to send Discord response", zap.Error(discordResponseErr))
 		return true
 	}
 
@@ -171,46 +276,10 @@ func chatChanel(s *discordgo.Session, data *discordgo.MessageCreate) bool {
 	if err := storeInteraction(
 		data.Author.ID,
 		&newPrompt, numNewPromptToken,
-		&resp.Choices[0].Message, resp.Usage.PromptTokens,
+		responseMessage, numResponseMessage,
 	); err != nil {
-		return true
+		Logger.Debug("failed to store interaction", zap.Error(err))
 	}
-
-	// Send chat response as reply
-	message := resp.Choices[0].Message.Content + "\n\n" + getTokenCostPriceString(resp.Usage.TotalTokens)
-
-	for len(message) > 0 {
-		contentSendInThisLoop := ""
-
-		if len(message) > 2000 {
-			for i := 1999; i > 0; i-- {
-				if message[i] == '\n' {
-					contentSendInThisLoop = message[:i]
-					message = message[i+1:]
-					break
-				}
-			}
-		} else {
-			contentSendInThisLoop = message
-			message = ""
-		}
-
-		if _, err := s.ChannelMessageSendComplex(data.ChannelID, &discordgo.MessageSend{
-			Content: contentSendInThisLoop,
-			Reference: &discordgo.MessageReference{
-				MessageID: data.ID,
-				GuildID:   data.GuildID,
-			},
-		}); err != nil {
-			Logger.Debug("failed to send message", zap.Error(err))
-		}
-	}
-
-	Logger.Debug(
-		"token information",
-		zap.Int("actual", resp.Usage.PromptTokens),
-		zap.Int("predicted", tokens+numNewPromptToken+3),
-	)
 
 	return true
 }
