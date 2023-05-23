@@ -5,8 +5,8 @@ go 1.20
 require (
 	github.com/bwmarrin/discordgo v0.27.1
 	github.com/jinzhu/configor v1.2.1
-	github.com/pkoukk/tiktoken-go v0.1.0
-	github.com/sashabaranov/go-openai v1.7.0
+	github.com/pkoukk/tiktoken-go v0.1.1
+	github.com/sashabaranov/go-openai v1.9.4
 	go.uber.org/zap v1.24.0
 )
 
