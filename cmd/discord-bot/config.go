@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 
 	"chatbot-gpt/internal/config"
+	"chatbot-gpt/internal/cost"
 	"chatbot-gpt/internal/database"
 	"chatbot-gpt/internal/locale"
 )
@@ -62,6 +63,9 @@ var (
 
 	// MessageDatabase is the database used to store messages.
 	MessageDatabase database.ChatDatabase
+
+	// CostCalculator is the calculator used to calculate the cost of a message.
+	CostCalculator *cost.Calculator
 )
 
 // initLogger initializes the logger.
@@ -170,6 +174,11 @@ func initMessageDatabase() {
 	MessageDatabase = database.NewMemoryChatDatabase()
 }
 
+// initCostCalculator initializes the cost calculator.
+func initCostCalculator() {
+	CostCalculator = cost.NewCalculator(Model)
+}
+
 func init() {
 	path := flag.String("config", "config.json", "Path to the cfg file")
 	flag.Parse()
@@ -186,6 +195,7 @@ func init() {
 	initLogger(userConfig.Discord.Production)
 	initMessageDatabase()
 	initOpenAIClient(userConfig.OpenAI)
+	initCostCalculator()
 	initDiscordClient(userConfig.Discord)
 	initLocalizer(userConfig.Discord)
 	initServerConfigMap(userConfig.Discord)
