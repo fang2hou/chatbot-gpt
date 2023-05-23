@@ -34,6 +34,10 @@ func predictTokens(messages []openai.ChatCompletionMessage, includeAssistantSign
 	case "gpt-4-0314":
 		tokensPerMessage = 3
 		tokensPerName = 1
+	case "gpt-4-32k":
+	case "gpt-4-32k-0314":
+		tokensPerMessage = 3
+		tokensPerName = 1
 	}
 
 	for _, message := range messages {
