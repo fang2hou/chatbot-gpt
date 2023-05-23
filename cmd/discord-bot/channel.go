@@ -54,14 +54,14 @@ func predictTokens(messages []openai.ChatCompletionMessage, includeAssistantSign
 }
 
 // getTokenCostPriceString returns the cost price of the given number of tokens.
-func getTokenCostPriceString(numTokens int) string {
-	numDollars := float64(numTokens) * 0.002 / 1000
-	numYen := numDollars * 132.45
-	numYuan := numDollars * 6.88
+func getTokenCostPriceString(numPromptTokens int, numSampledTokens int) string {
+	numDollars := CostCalculator.GetPromptCost(numPromptTokens) + CostCalculator.GetSampledCost(numSampledTokens)
+	numYen := numDollars * 138.31
+	numYuan := numDollars * 7.05
 
 	return fmt.Sprintf(
-		"💠 %d  →  🇺🇸 $%.3f / 🇯🇵 ￥%.3f / 🇨🇳 ￥%.3f",
-		numTokens, numDollars, numYen, numYuan,
+		"💠 (%d, %d)  →  🇺🇸 $%.3f / 🇯🇵 ￥%.3f / 🇨🇳 ￥%.3f",
+		numPromptTokens, numSampledTokens, numDollars, numYen, numYuan,
 	)
 }
 
@@ -83,6 +83,7 @@ func storeInteraction(
 	return nil
 }
 
+// sendDiscordResponseWithStream sends the response to the user via Discord.
 func sendDiscordResponseWithStream(
 	stream *openai.ChatCompletionStream, interval time.Duration,
 	s *discordgo.Session, guildID, channelID, messageID string,
@@ -122,17 +123,19 @@ func sendDiscordResponseWithStream(
 				return err
 			}
 
-			if newMessage, err := s.ChannelMessageSendComplex(channelID, &discordgo.MessageSend{
+			newMessage, newMessageErr := s.ChannelMessageSendComplex(channelID, &discordgo.MessageSend{
 				Content: currentResponseString,
 				Reference: &discordgo.MessageReference{
 					MessageID: messageID,
 					GuildID:   guildID,
 				},
-			}); err != nil {
-				return err
-			} else {
-				currentResponse = newMessage
+			})
+
+			if newMessageErr != nil {
+				return newMessageErr
 			}
+
+			currentResponse = newMessage
 		} else {
 			if _, err := s.ChannelMessageEdit(channelID, currentResponse.ID, currentResponseString); err != nil {
 				return err
@@ -172,14 +175,14 @@ func sendDiscordResponseWithStream(
 		Role:    openai.ChatMessageRoleAssistant,
 	}
 
-	numToken := predictTokens([]openai.ChatCompletionMessage{*message}, false)
-	currentResponseString += "\n\n" + getTokenCostPriceString(numToken+numPromptTokens)
+	numSampledTokens := predictTokens([]openai.ChatCompletionMessage{*message}, false)
+	currentResponseString += "\n\n" + getTokenCostPriceString(numPromptTokens, numSampledTokens)
 
 	if err := tryUpdateResponse(); err != nil {
 		return nil, 0, err
 	}
 
-	return message, numToken, nil
+	return message, numSampledTokens, nil
 }
 
 // sendErrorMessage sends an error message.
