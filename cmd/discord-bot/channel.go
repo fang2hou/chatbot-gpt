@@ -93,17 +93,19 @@ func sendDiscordResponseWithStream(
 	var currentResponseString string
 	var allResponseString string
 
-	if resp, err := s.ChannelMessageSendComplex(channelID, &discordgo.MessageSend{
+	resp, respErr := s.ChannelMessageSendComplex(channelID, &discordgo.MessageSend{
 		Content: Localizer.Fetch("wait_for_response", lang),
 		Reference: &discordgo.MessageReference{
 			MessageID: messageID,
 			GuildID:   guildID,
 		},
-	}); err != nil {
-		return nil, 0, err
-	} else {
-		currentResponse = resp
+	})
+
+	if respErr != nil {
+		return nil, 0, respErr
 	}
+
+	currentResponse = resp
 
 	lastSentTime := time.Now()
 
