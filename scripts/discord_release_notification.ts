@@ -93,7 +93,7 @@ async function main() {
         ],
     });
 
-    if (translationResp.data.choices[0].message != null){
+    if (translationResp.data.choices[0].message != null) {
         releaseNote = translationResp.data.choices[0].message.content;
         releaseNote += '\n\n:beginner: 以上内容由 OpenAI GPT-3.5 Turbo 生成';
     }
@@ -130,7 +130,9 @@ async function main() {
         url: DISCORD_WEBHOOK_URL,
     });
 
-    await webhookClient.send({embeds: [embed]}).catch((error) => {console.error(error)});
+    await webhookClient.send({embeds: [embed]}).catch((error) => {
+        console.error(error)
+    });
     webhookClient.destroy();
 }
 
