@@ -12,7 +12,9 @@ var (
 	messageHandlers []func(*discordgo.Session, *discordgo.MessageCreate) bool
 
 	// interactionHandlers is a map of interaction handlers.
-	interactionHandlers = make(map[string]map[string]func(*discordgo.Session, *discordgo.InteractionCreate))
+	interactionHandlers = make(
+		map[string]map[string]func(*discordgo.Session, *discordgo.InteractionCreate),
+	)
 
 	// slashCommands is a list of slash commands.
 	slashCommands = struct {
@@ -54,7 +56,10 @@ func addHandlers() {
 // initSlashCommands initializes the slash commands.
 func initSlashCommands() {
 	for serverID, serverConfig := range ServerConfigMap {
-		commands, commandsGetErr := DiscordClient.ApplicationCommands(DiscordClient.State.Application.ID, serverID)
+		commands, commandsGetErr := DiscordClient.ApplicationCommands(
+			DiscordClient.State.Application.ID,
+			serverID,
+		)
 		if commandsGetErr != nil {
 			Logger.Error("failed to get slash commands", zap.Error(commandsGetErr))
 			return
@@ -68,11 +73,17 @@ func initSlashCommands() {
 		}
 
 		if serverConfig.Commands.ClearContext.Enable {
-			interactionHandlers[serverID] = make(map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate))
+			interactionHandlers[serverID] = make(
+				map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate),
+			)
 
 			for _, alias := range serverConfig.Commands.ClearContext.Aliases {
 				interactionHandlers[serverID][alias] = func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-					Logger.Debug("received interaction", zap.String("command", alias), zap.String("user", i.Member.User.Username))
+					Logger.Debug(
+						"received interaction",
+						zap.String("command", alias),
+						zap.String("user", i.Member.User.Username),
+					)
 
 					MessageDatabase.Clear(i.Member.User.ID)
 

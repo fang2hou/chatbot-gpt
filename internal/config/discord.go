@@ -3,8 +3,8 @@ package config
 // Discord is the configuration for the Discord bot.
 type Discord struct {
 	Production bool                         `json:"production" yaml:"production" default:"false"`
-	Token      string                       `json:"token" yaml:"token" default:""`
-	Locales    map[string]map[string]string `json:"locales" yaml:"locales" default:"{}"`
+	Token      string                       `json:"token"      yaml:"token"      default:""`
+	Locales    map[string]map[string]string `json:"locales"    yaml:"locales"    default:"{}"`
 	Servers    []struct {
 		ID           string `json:"id" yaml:"id"`
 		Language     string `json:"language" yaml:"language" default:"enUS"`
@@ -20,5 +20,5 @@ type Discord struct {
 				Aliases []string `json:"aliases" yaml:"aliases" default:"[]"`
 			} `json:"clear_context" yaml:"clear_context"`
 		} `json:"commands" yaml:"commands"`
-	} `json:"servers" yaml:"servers" default:"[]"`
+	} `json:"servers"    yaml:"servers"    default:"[]"`
 }

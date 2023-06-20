@@ -21,7 +21,10 @@ func main() {
 
 	defer func() {
 		for serverID := range ServerConfigMap {
-			commands, commandsGetErr := DiscordClient.ApplicationCommands(DiscordClient.State.Application.ID, serverID)
+			commands, commandsGetErr := DiscordClient.ApplicationCommands(
+				DiscordClient.State.Application.ID,
+				serverID,
+			)
 			if commandsGetErr == nil {
 				for _, command := range commands {
 					if err := DiscordClient.ApplicationCommandDelete(DiscordClient.State.Application.ID, serverID, command.ID); err != nil {

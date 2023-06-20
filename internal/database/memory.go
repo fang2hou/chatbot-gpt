@@ -19,7 +19,10 @@ type MemoryChatDatabase struct {
 }
 
 // Fetch fetches the messages that not exceed the token limit.
-func (m *MemoryChatDatabase) Fetch(userID string, maxToken int) ([]*openai.ChatCompletionMessage, int, error) {
+func (m *MemoryChatDatabase) Fetch(
+	userID string,
+	maxToken int,
+) ([]*openai.ChatCompletionMessage, int, error) {
 	tokens := 0
 	var messages []*openai.ChatCompletionMessage
 
@@ -38,7 +41,11 @@ func (m *MemoryChatDatabase) Fetch(userID string, maxToken int) ([]*openai.ChatC
 }
 
 // Store stores the message in the database
-func (m *MemoryChatDatabase) Store(userID string, newMessage *openai.ChatCompletionMessage, numToken int) error {
+func (m *MemoryChatDatabase) Store(
+	userID string,
+	newMessage *openai.ChatCompletionMessage,
+	numToken int,
+) error {
 	// Insert the new message at the beginning of the slice
 	newMessages := []messageData{
 		{

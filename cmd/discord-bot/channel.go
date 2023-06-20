@@ -55,7 +55,11 @@ func predictTokens(messages []openai.ChatCompletionMessage, includeAssistantSign
 
 // getTokenCostPriceString returns the cost price of the given number of tokens.
 func getTokenCostPriceString(numPromptTokens int, numSampledTokens int) string {
-	numDollars := CostCalculator.GetPromptCost(numPromptTokens) + CostCalculator.GetSampledCost(numSampledTokens)
+	numDollars := CostCalculator.GetPromptCost(
+		numPromptTokens,
+	) + CostCalculator.GetSampledCost(
+		numSampledTokens,
+	)
 	numYen := numDollars * 138.31
 	numYuan := numDollars * 7.05
 
@@ -125,13 +129,16 @@ func sendDiscordResponseWithStream(
 				return err
 			}
 
-			newMessage, newMessageErr := s.ChannelMessageSendComplex(channelID, &discordgo.MessageSend{
-				Content: currentResponseString,
-				Reference: &discordgo.MessageReference{
-					MessageID: messageID,
-					GuildID:   guildID,
+			newMessage, newMessageErr := s.ChannelMessageSendComplex(
+				channelID,
+				&discordgo.MessageSend{
+					Content: currentResponseString,
+					Reference: &discordgo.MessageReference{
+						MessageID: messageID,
+						GuildID:   guildID,
+					},
 				},
-			})
+			)
 
 			if newMessageErr != nil {
 				return newMessageErr
@@ -188,7 +195,12 @@ func sendDiscordResponseWithStream(
 }
 
 // sendErrorMessage sends an error message.
-func sendErrorMessage(s *discordgo.Session, data *discordgo.MessageCreate, lang locale.Language, errorMessage string) {
+func sendErrorMessage(
+	s *discordgo.Session,
+	data *discordgo.MessageCreate,
+	lang locale.Language,
+	errorMessage string,
+) {
 	if _, err := s.ChannelMessageSendComplex(data.ChannelID, &discordgo.MessageSend{
 		Embeds: []*discordgo.MessageEmbed{
 			{
@@ -257,12 +269,15 @@ func chatChanel(s *discordgo.Session, data *discordgo.MessageCreate) bool {
 		zap.Int("numNewPromptToken", numNewPromptToken),
 	)
 
-	stream, openAIChatErr := OpenAIClient.CreateChatCompletionStream(context.Background(), openai.ChatCompletionRequest{
-		MaxTokens: channelConfig.CompletionTokenLimit,
-		Model:     Model.ID,
-		Messages:  prompts,
-		User:      data.Author.ID,
-	})
+	stream, openAIChatErr := OpenAIClient.CreateChatCompletionStream(
+		context.Background(),
+		openai.ChatCompletionRequest{
+			MaxTokens: channelConfig.CompletionTokenLimit,
+			Model:     Model.ID,
+			Messages:  prompts,
+			User:      data.Author.ID,
+		},
+	)
 
 	if openAIChatErr != nil {
 		sendErrorMessage(s, data, serverConfig.Language, "error_response")

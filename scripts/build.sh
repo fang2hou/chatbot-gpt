@@ -5,21 +5,21 @@ SRC_DIR=./cmd/$1
 BIN_DIR=./bin/$1
 
 if [ -n "$2" ]; then
-  GOOS=$2
+    GOOS=$2
 else
-  GOOS=$(go env GOOS)
+    GOOS=$(go env GOOS)
 fi
 
 if [ -n "$3" ]; then
-  GOARCH=$3
+    GOARCH=$3
 else
-  GOARCH=$(go env GOARCH)
+    GOARCH=$(go env GOARCH)
 fi
 
 if [ -n "$4" ]; then
-  GOARM=$4;
+    GOARM=$4;
 else
-  GOARM=$(go env GOARM)
+    GOARM=$(go env GOARM)
 fi
 
 ARCH=$GOARCH
@@ -33,7 +33,7 @@ echo "$START_MSG"
 
 FILENAME="$APP_NAME"_"$GOOS"_"$ARCH"
 if [ "$GOOS" = "windows" ]; then
-  FILENAME="$FILENAME.exe";
+    FILENAME="$FILENAME.exe";
 fi
 
 mkdir -p "$BIN_DIR"

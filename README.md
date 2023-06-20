@@ -46,4 +46,5 @@ export CHATBOT_GPT_OPENAI_TOKEN=token
 ./bin/discord-bot/discord-bot_darwin_arm64 --config=configs/discord-bot.yml
 ```
 
-Otherwise, you need to find the binary file in the `bin` directory, and specify the configuration file.
+Otherwise, you need to find the binary file in the `bin` directory,
+and specify the configuration file.

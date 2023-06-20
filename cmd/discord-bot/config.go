@@ -187,7 +187,6 @@ func init() {
 		Discord config.Discord
 		OpenAI  config.OpenAI
 	}{}, configPrefix, *path)
-
 	if err != nil {
 		panic(err)
 	}
