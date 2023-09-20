@@ -87,7 +87,7 @@ async function main() {
     model: "gpt-3.5-turbo",
     messages: [
       {
-        role: "user",
+        role: "system",
         content:
           "You are a translator for translating the software changelog to chinese," +
           "your answer should not include anything outside the list." +
@@ -100,10 +100,8 @@ async function main() {
     ],
   });
 
-  if (completion.choices[0].message != null) {
-    releaseNote = completion.choices[0].message.content;
-    releaseNote += "\n\n:beginner: 以上内容由 OpenAI GPT-3.5 Turbo 生成";
-  }
+  releaseNote = completion.choices[0].message?.content ?? "";
+  releaseNote += "\n\n:beginner: 以上内容由 OpenAI GPT-3.5 Turbo 生成";
 
   const fields: RestOrArray<APIEmbedField> = [];
 
