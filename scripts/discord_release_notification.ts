@@ -6,7 +6,7 @@ import {
   RestOrArray,
   WebhookClient,
 } from "discord.js";
-import { Configuration, OpenAIApi } from "openai";
+import OpenAI from "openai";
 
 // env returns the value of the environment variable with the given name.
 let env = (envName: string): string => {
@@ -82,11 +82,9 @@ async function main() {
   });
 
   // Translate the release note to Chinese
-  let openaiClient = new OpenAIApi(
-    new Configuration({ apiKey: OPENAI_API_KEY })
-  );
-  let translationResp = await openaiClient.createChatCompletion({
-    model: "gpt-3.5-turbo-0301",
+  let openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+  let completion = await openai.chat.completions.create({
+    model: "gpt-3.5-turbo",
     messages: [
       {
         role: "user",
@@ -102,8 +100,8 @@ async function main() {
     ],
   });
 
-  if (translationResp.data.choices[0].message != null) {
-    releaseNote = translationResp.data.choices[0].message.content;
+  if (completion.choices[0].message != null) {
+    releaseNote = completion.choices[0].message.content;
     releaseNote += "\n\n:beginner: 以上内容由 OpenAI GPT-3.5 Turbo 生成";
   }
 
@@ -111,7 +109,7 @@ async function main() {
 
   fields.push(
     { name: "**变更列表**", value: releaseNote, inline: false },
-    { name: "\u200B", value: "\u200B", inline: false }
+    { name: "\u200B", value: "\u200B", inline: false },
   );
 
   for (const [key, value] of Object.entries(artifactSuffixes)) {
@@ -119,7 +117,7 @@ async function main() {
       name: `:low_brightness: ${key}`,
       value: `:small_blue_diamond: [下载](${getArtifactUrl(
         "discord-bot",
-        value
+        value,
       )})`,
       inline: true,
     });
