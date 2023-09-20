@@ -1,6 +1,6 @@
 package cost
 
-import "github.com/sashabaranov/go-openai"
+import openai "github.com/sashabaranov/go-openai"
 
 // Calculator is a calculator for calculating the cost of a completion.
 type Calculator struct {

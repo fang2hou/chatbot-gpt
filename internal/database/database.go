@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/sashabaranov/go-openai"
+	openai "github.com/sashabaranov/go-openai"
 )
 
 type ChatDatabase interface {

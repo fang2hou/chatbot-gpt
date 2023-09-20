@@ -3,7 +3,7 @@ package database
 import (
 	"time"
 
-	"github.com/sashabaranov/go-openai"
+	openai "github.com/sashabaranov/go-openai"
 )
 
 // messageData is a struct for storing a message and its timestamp

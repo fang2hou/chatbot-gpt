@@ -5,8 +5,8 @@ import (
 	"flag"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/pkoukk/tiktoken-go"
-	"github.com/sashabaranov/go-openai"
+	tiktoken "github.com/pkoukk/tiktoken-go"
+	openai "github.com/sashabaranov/go-openai"
 	"go.uber.org/zap"
 
 	"chatbot-gpt/internal/config"
