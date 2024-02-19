@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	DiscordClient.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
+	DiscordClient.AddHandler(func(s *discordgo.Session, _ *discordgo.Ready) {
 		botAccount := s.State.User.Username + "#" + s.State.User.Discriminator
 		Logger.Info("logged in as " + botAccount)
 	})
